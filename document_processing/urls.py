@@ -4,6 +4,7 @@ from document_processing import views
 app_name = 'document_processing'
 
 urlpatterns = [
-    path('', views.LoadFileView.as_view(), name='load_file'),
-    path('processed-file/<int:pk>', views.ProcessedFile.as_view(), name='processed_file'),
+    path('', views.MultipleFileUploadView.as_view(), name='load_file'),
+    path('processed-files/', views.Processed.as_view(), name='processed_file'),
+    path('progress/<int:pk>', views.get_file_progress, name='get_file_progress'),
 ]

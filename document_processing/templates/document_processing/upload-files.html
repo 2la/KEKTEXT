@@ -1,0 +1,25 @@
+{% extends 'document_processing/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+{% crispy form %}
+
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+  $('#{{ form.file.id_for_label }}').on('change', function() {
+      if ($(this)[0].files){
+        let files_amount = $(this)[0].files.length;
+        if (files_amount % 10 === 1){
+            $(this).next('.custom-file-label').html('Выбран ' + files_amount + ' файл');
+        } else if (files_amount % 10 === 2 || files_amount % 10 === 3 || files_amount % 10 === 4){
+            $(this).next('.custom-file-label').html('Выбрано ' + files_amount + ' файла');
+        } else {
+            $(this).next('.custom-file-label').html('Выбрано ' + files_amount + ' файлов');
+        }
+      }
+  });
+</script>
+{% endblock scripts %}
