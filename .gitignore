@@ -1,3 +1,9 @@
+.idea
+__pycache__
+venv
+corpora
+data
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
