@@ -1,0 +1,13 @@
+{% extends 'document_processing/base.html' %}
+
+{% block content %}
+
+<div>
+    {% if object.processed_text %}
+        {{ object.processed_text }}
+    {% else %}
+        Processing... (Press F5)
+    {% endif%}
+</div>
+
+{% endblock %}
