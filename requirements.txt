@@ -4,3 +4,4 @@ shapely
 lanms
 torch
 torchvision
+pyyaml
