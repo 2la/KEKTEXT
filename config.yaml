@@ -1,9 +1,0 @@
-train_gt_path: '/home/mark/data/ICDAR/gts'
-train_img_path: '/home/mark/data/ICDAR/images'
-save_path: '/home/mark/PyCharmProjects/experiments/exp1'
-
-batch_size: 24
-learning_rate: 0.001
-num_workers: 4
-epochs: 600
-save_interval: 5

@@ -2,9 +2,17 @@ import torch
 from torchvision import transforms
 from PIL import Image, ImageDraw
 from model import TextDetector
-from dataset import get_rotate_mat
 import numpy as np
 import lanms
+import math
+import cv2
+
+import pyocr
+
+
+def get_rotate_mat(theta):
+    return np.array([[math.cos(theta), -math.sin(theta)],
+                     [math.sin(theta), math.cos(theta)]])
 
 
 def resize_img(img):
@@ -115,16 +123,37 @@ def plot_boxes(img, boxes):
 
 
 if __name__ == '__main__':
-    img_path = '../ICDAR_2015/test_img/img_2.jpg'
-    model_path = 'weights/east_vgg16.pth'
-    pretrained_path = 'weights/vgg16_bn-6c64b313.pth'
-    res_img = './res.bmp'
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    model = TextDetector(True, pretrained_path).to(device)
-    model.load_state_dict(torch.load(model_path))
-    model.eval()
-    img = Image.open(img_path)
+    img_path = 'images/tekst1_stranica_2_s.jpg'
 
-    boxes = detect(img, model, device)
-    plot_img = plot_boxes(img, boxes)
-    plot_img.save(res_img)
+    T = pyocr.get_available_tools()[0]
+    L = T.get_available_languages()[0]
+    txt = T.image_to_string(
+        Image.open(img_path),
+        lang=L,
+        builder=pyocr.builders.TextBuilder()
+    )
+    print(txt)
+    # model_path = 'weights/east_vgg16.pth'
+    # pretrained_path = 'weights/vgg16_bn-6c64b313.pth'
+    # res_img = './res.bmp'
+    # device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    # model = TextDetector(True, pretrained_path).to(device)
+    # model.load_state_dict(torch.load(model_path))
+    # model.eval()
+    # img = Image.open(img_path).convert('RGB')
+    # print(ptst.image_to_string(img, lang='en'))
+    # to_draw = cv2.imread(img_path)
+    # boxes = detect(img, model, device)
+    # for box in boxes:
+    #     xmin = int(min(box[i] for i in range(0, 8, 2)))
+    #     ymin = int(min(box[i] for i in range(1, 8, 2)))
+    #     xmax = int(max(box[i] for i in range(0, 8, 2)))
+    #     ymax = int(max(box[i] for i in range(1, 8, 2)))
+    #     text = to_draw[ymin: ymax, xmin: xmax, :]
+    #     pil_text_image = Image.fromarray(text.astype('uint8'), 'RGB')
+    #     print(ptst.image_to_string(img, lang='ru'))
+    #     cv2.rectangle(to_draw, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)
+    #     cv2.imshow('Image', text)
+    #     cv2.waitKey()
+    # plot_img = plot_boxes(img, boxes)
+    # plot_img.save(res_img)

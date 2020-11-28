@@ -5,3 +5,5 @@ lanms
 torch
 torchvision
 pyyaml
+pytesseract
+pyocr
