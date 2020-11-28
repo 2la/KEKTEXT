@@ -1,0 +1,3 @@
+nltk == 3.5
+pymorphy2 == 0.9.1
+jamspell == 0.0.12
