@@ -1,29 +1,12 @@
 import json
 
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.views.generic import CreateView, ListView, DetailView
 
 from document_processing.forms import MultipleFileUploadForm, TextboxForm
-from document_processing.models import File, TextboxUnit
+from document_processing.models import File
 from document_processing.tasks import process_file
-
-
-# class MultipleFileUploadView(CreateView):
-#     form_class = MultipleFileUploadForm
-#     template_name = 'document_processing/upload-files.html'
-#
-#     def get_success_url(self):
-#         return '/'
-#
-#     def form_valid(self, form):
-#         print('FORM IS VALID')
-#         result = super().form_valid(form)
-#         for file in self.object:
-#             process_file(file_id=file.pk)
-#         print('FILE SENT TO PROCESSING')
-#         return result
 from text_processor import TextProcessor
 
 
@@ -46,8 +29,6 @@ class TextboxProcessingView(CreateView):
 class TextboxView(DetailView):
     model = File
     template_name = 'document_processing/textbox.html'
-
-
 
 
 class FileProcessingView(CreateView, ListView):

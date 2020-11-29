@@ -22,10 +22,10 @@
        <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
         <ul class="navbar-nav col-10">
           <li class="nav-item">
-            <a class="nav-link" href="#">Files</a>
+            <a class="nav-link" href="{% url 'document_processing:processed_file' %}">Files</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">Text</a>
+            <a class="nav-link" href="{% url 'document_processing:textbox_processing' %}">Text</a>
           </li>
         </ul>
       </div>

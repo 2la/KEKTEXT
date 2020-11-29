@@ -22,9 +22,9 @@ def get_output_field(file):
     output_name, ext = output_name.split('.')
     print(output_name, ext)
     output_name += '.docx'
-    output_name = os.path.join(file.processed_file.field.upload_to, output_name)
     print(output_name)
-    return file.processed_file.storage.path(output_name)
+    output_name = os.path.join(file.processed_file.field.upload_to, output_name)
+    return output_name
 
 
 def get_input_type(file):
@@ -99,7 +99,7 @@ def process_file(file_id):
             raise ValueError('Error with document')
         output_name = get_output_field(file)
         document.change_text(processed_text)
-        document.save(output_name)
+        document.save(file.processed_file.storage.path(output_name))
         file.processed_file = output_name
     sleep(.5)
     file.progress = 100

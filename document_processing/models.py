@@ -21,8 +21,7 @@ class File(models.Model):
     @property
     def short_origin_name(self):
         if self.input_type == self.InputTypes.TEXTBOX:
-            # return f'{self.origin_text[:50]}...'
-            return self.origin_text
+            return f'{self.origin_text[:50]}...'
         try:
             return self.origin_file.path.split('/')[-1]
         except ValueError:
@@ -31,17 +30,9 @@ class File(models.Model):
     @property
     def short_processed_name(self):
         if self.input_type == self.InputTypes.TEXTBOX:
-            # return f'{self.processed_text[:50]}...'
-            return self.processed_text
+            return f'{self.processed_text[:50]}...'
         try:
             return self.processed_file.path.split('/')[-1]
         except ValueError:
             return ''
-
-
-class TextboxUnit(models.Model):
-    origin_text = models.TextField(max_length=2000)
-    processed_text = models.TextField(max_length=2000, blank=True, default='')
-    progress = models.PositiveSmallIntegerField(default=0)
-
 

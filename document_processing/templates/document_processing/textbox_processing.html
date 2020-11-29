@@ -3,67 +3,8 @@
 
 {% block content %}
 <main class="container mt-3">
-    <h1>File processing</h1>
+    <h1>Text processing</h1>
     <div>{% crispy form %}</div>
-<!--    <div>-->
-<!--        <table>-->
-<!--            <thead>-->
-<!--            <tr>-->
-<!--                <th>ID</th>-->
-<!--                <th>Origin</th>-->
-<!--                <th>Processed</th>-->
-<!--                <th>Progress</th>-->
-<!--            </tr>-->
-<!--            </thead>-->
-<!--            <tbody>-->
-<!--            {% for file in files %}-->
-<!--            <tr class="processing-info" data-file-id="{{file.id}}">-->
-<!--                <td name="id">{{file.id}}</td>-->
-<!--                <td name="origin"><a href="file.origin_file.url">{{file.short_origin_name}}</a></td>-->
-<!--                <td name="processed"><a href="file.origin_file.url">{{file.short_processed_name}}</a></td>-->
-<!--                <td name="progress"><progress class="progress progress-success" value="{{file.progress}}" max="100"></progress>-->
-<!--    </td>-->
-<!--            </tr>-->
-<!--            {% endfor %}-->
-<!--            </tbody>-->
-<!--        </table>-->
-<!--    </div>-->
 
 </main>
 {% endblock %}
-
-
-{% block scripts %}
-<script>
-  $(document).ready(
-      function() {
-          $(".processing-info").each(
-              function(){
-                  let polling = setInterval(
-                      async () => {
-                          let current_value = parseInt($( this ).children('td[name="progress"]').children('progress')[0].getAttribute("value"));
-                          if (current_value === 100) {
-                              clearInterval(polling);
-                              return;
-                          }
-                          let response = await fetch("/progress/" + $( this ).attr("data-file-id"));
-                          if (!response.ok){
-                              return;
-                          }
-                          let json = await response.json();
-                          if (current_value < json.progress){
-                              $( this ).children('td[name="progress"]').children('progress')[0].setAttribute("value", json.progress);
-                              $( this ).children('td[name="processed"]').children('a')[0].setAttribute("href", json.processed_url);
-                              $( this ).children('td[name="processed"]').children('a')[0].textContent = json.processed_name;
-                          }
-
-
-                      }, 250
-                  );
-              }
-          );
-      }
-  );
-
-</script>
-{% endblock scripts %}
