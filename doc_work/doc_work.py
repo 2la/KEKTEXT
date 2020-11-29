@@ -31,11 +31,6 @@ class Document:
         self.fio = None
         self.f = None
 
-    # def new_doc(self, text):
-    #     for paragraph in text.split('\n'):
-    #         self.docx.add_paragraph(paragraph)
-    #     self.filetype = 'docx'
-    #     return None
 
     def pdf2docx(self):
         pdf2docx.parse(self.data_file_path, self.data_file_path + '.docx')
