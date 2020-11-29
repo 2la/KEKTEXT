@@ -19,7 +19,11 @@ text_params = {
 
 def get_output_field(file):
     output_name = file.processed_file.storage.get_available_name(file.short_origin_name)
+    output_name, ext = output_name.split('.')
+    print(output_name, ext)
+    output_name += '.docx'
     output_name = os.path.join(file.processed_file.field.upload_to, output_name)
+    print(output_name)
     return file.processed_file.storage.path(output_name)
 
 
@@ -57,9 +61,9 @@ def process_file(file_id):
     file.save()
 
 
-
     document = None
     if file.input_type == File.InputTypes.IMAGE:
+        document = Document()
         text = image_to_text(origin_path)
     elif file.input_type == File.InputTypes.TEXTBOX:
         text = file.origin_text
@@ -87,8 +91,9 @@ def process_file(file_id):
     file.progress += 10
     file.save()
 
-    if file.input_type in (File.InputTypes.IMAGE, File.InputTypes.TEXTBOX):
+    if file.input_type == File.InputTypes.TEXTBOX:
         file.processed_text = processed_text
+
     else:
         if document is None:
             raise ValueError('Error with document')

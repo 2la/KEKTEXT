@@ -5,29 +5,29 @@
 <main class="container mt-3">
     <h1>File processing</h1>
     <div>{% crispy form %}</div>
-    <div>
-        <table>
-            <thead>
-            <tr>
-                <th>ID</th>
-                <th>Origin</th>
-                <th>Processed</th>
-                <th>Progress</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for file in files %}
-            <tr class="processing-info" data-file-id="{{file.id}}">
-                <td name="id">{{file.id}}</td>
-                <td name="origin"><a href="file.origin_file.url">{{file.short_origin_name}}</a></td>
-                <td name="processed"><a href="file.origin_file.url">{{file.short_processed_name}}</a></td>
-                <td name="progress"><progress class="progress progress-success" value="{{file.progress}}" max="100"></progress>
-    </td>
-            </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    </div>
+<!--    <div>-->
+<!--        <table>-->
+<!--            <thead>-->
+<!--            <tr>-->
+<!--                <th>ID</th>-->
+<!--                <th>Origin</th>-->
+<!--                <th>Processed</th>-->
+<!--                <th>Progress</th>-->
+<!--            </tr>-->
+<!--            </thead>-->
+<!--            <tbody>-->
+<!--            {% for file in files %}-->
+<!--            <tr class="processing-info" data-file-id="{{file.id}}">-->
+<!--                <td name="id">{{file.id}}</td>-->
+<!--                <td name="origin"><a href="file.origin_file.url">{{file.short_origin_name}}</a></td>-->
+<!--                <td name="processed"><a href="file.origin_file.url">{{file.short_processed_name}}</a></td>-->
+<!--                <td name="progress"><progress class="progress progress-success" value="{{file.progress}}" max="100"></progress>-->
+<!--    </td>-->
+<!--            </tr>-->
+<!--            {% endfor %}-->
+<!--            </tbody>-->
+<!--        </table>-->
+<!--    </div>-->
 
 </main>
 {% endblock %}

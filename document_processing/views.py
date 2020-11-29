@@ -1,7 +1,9 @@
 import json
 
 from django.http import HttpResponse
-from django.views.generic import CreateView, ListView
+from django.shortcuts import get_object_or_404
+from django.urls import reverse
+from django.views.generic import CreateView, ListView, DetailView
 
 from document_processing.forms import MultipleFileUploadForm, TextboxForm
 from document_processing.models import File, TextboxUnit
@@ -22,9 +24,10 @@ from document_processing.tasks import process_file
 #             process_file(file_id=file.pk)
 #         print('FILE SENT TO PROCESSING')
 #         return result
+from text_processor import TextProcessor
 
 
-class TextboxProcessingView(CreateView, ListView):
+class TextboxProcessingView(CreateView):
     model = File
     form_class = TextboxForm
     template_name = 'document_processing/textbox_processing.html'
@@ -32,15 +35,19 @@ class TextboxProcessingView(CreateView, ListView):
     object_list = None
 
     def get_success_url(self):
-        return self.request.path
-
-    def get_queryset(self):
-        return File.objects.filter(input_type=File.InputTypes.TEXTBOX).order_by('-pk')
+        return reverse('document_processing:textbox', kwargs={'pk': self.object.pk})
 
     def form_valid(self, form):
-        result = super().form_valid(form)
-        process_file(file_id=self.object.pk)
-        return result
+        text_processor = TextProcessor()
+        form.instance.processed_text = text_processor.process(form.cleaned_data['origin_text'])
+        return super().form_valid(form)
+
+
+class TextboxView(DetailView):
+    model = File
+    template_name = 'document_processing/textbox.html'
+
+
 
 
 class FileProcessingView(CreateView, ListView):
@@ -53,7 +60,7 @@ class FileProcessingView(CreateView, ListView):
         return self.request.path
 
     def get_queryset(self):
-        return File.objects.all().order_by('-pk')
+        return File.objects.exclude(input_type=File.InputTypes.TEXTBOX).order_by('-pk')
 
     def form_valid(self, form):
         result = super().form_valid(form)
