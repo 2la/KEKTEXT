@@ -21,7 +21,7 @@ class Document:
         self.filetype = data_file_path.rsplit('.')[-1]
         self.text_params = text_params
         self.text = ''
-        self.docx = None
+        self.docx = docx.Document()
         self.paragraphs = None
         self.start_target_paragraph = None
         self.stop_target_paragraph = None
@@ -31,6 +31,12 @@ class Document:
     def pdf2docx(self):
         pdf2docx.parse(self.data_file_path, self.data_file_path + '.docx')
         self.data_file_path = self.data_file_path + '.docx'
+        self.filetype = 'docx'
+        return None
+
+    def txt2docx(self):
+        for paragraph in self.paragraphs:
+            self.docx.add_paragraph(paragraph)
         self.filetype = 'docx'
         return None
 
@@ -52,6 +58,7 @@ class Document:
             self.docx_parser()
         elif self.filetype == 'txt':
             self.txt_parser()
+            self.txt2docx()
         # found target text (match start and stop paragraphs)
         for i, paragraph in enumerate(self.paragraphs):
             if self.start_target_paragraph is None:
@@ -67,7 +74,8 @@ class Document:
                     self.fio = paragraph[fio_pos_start: fio_pos_stop]
         # extract text
         self.paragraphs = self.paragraphs[self.start_target_paragraph: self.stop_target_paragraph]
-        self.paragraphs = list(map(preprocess_text, self.paragraphs))
+        remove_wrap = self.filetype == 'pdf'
+        self.paragraphs = list(map(lambda x: preprocess_text(x, remove_wrap), self.paragraphs))
         self.text = '\n'.join(self.paragraphs)
         if void:
             return None
@@ -75,28 +83,47 @@ class Document:
             return self.text
 
     def find_fio(self, only_family_name=True):
-        table_text = []
-        for t in d.docx.tables:
-            for r in t.rows:
-                for c in r.cells:
-                    if self.fio is None:
-                        fio_pos_start = c.text.find(self.text_params['fio'])
-                        if fio_pos_start != -1:
-                            self.fio = c.text[fio_pos_start + len(self.text_params['fio']):].strip()
-                            self.f = self.fio.split()[0]
-                    else:
-                        break
+        if self.filetype == 'docx':
+            table_text = []
+            for t in self.docx.tables:
+                for r in t.rows:
+                    for c in r.cells:
+                        if self.fio is None:
+                            fio_pos_start = c.text.find(self.text_params['fio'])
+                            if fio_pos_start != -1:
+                                self.fio = c.text[fio_pos_start + len(self.text_params['fio']):].strip()
+                                self.f = self.fio.split()[0]
+                        else:
+                            break
+        elif self.filetype == 'txt':
+            fio_pos_start = self.text.find(self.text_params['fio'])
+            if fio_pos_start != -1:
+                self.fio = self.text[fio_pos_start + len(self.text_params['fio']):].strip()
+                self.f = self.fio.split()[0]
+
         if only_family_name:
             return self.f
         else:
             return self.fio
 
-    def change_text(self, new_text):
-        new_text = new_text.split('\n')
-        for i, text in zip(range(self.start_target_paragraph, self.stop_target_paragraph), new_text):
-            self.docx.paragraphs[i].text = text
-            for j in range(len(self.docx.paragraphs[i].runs)):
-                self.docx.paragraphs[i].runs[j].font.color.rgb = docx.shared.RGBColor(0x42, 0x24, 0xE9)
+    def change_text(self, new_text, highlight_text=True):
+        if self.filetype == 'docx':
+            new_text = new_text.split('\n')
+            for i, text in zip(range(self.start_target_paragraph, self.stop_target_paragraph), new_text):
+                if highlight_text:
+                    t = ''
+                    for w_old, w_new in zip(self.docx.paragraphs[i].text.split(), text.split()):
+                        if w_old != w_new:
+                            t = t + ' ' + str.upper(w_new)
+                        else:
+                            t = t + ' ' + w_new
+                    self.docx.paragraphs[i].text = t
+                else:
+                    self.docx.paragraphs[i].text = text
+                # for j in range(len(self.docx.paragraphs[i].runs)):
+                #     self.docx.paragraphs[i].runs[j].font.color.rgb = docx.shared.RGBColor(0x42, 0x24, 0xE9)
+        elif self.filetype == 'txt':
+            self.text = self.text[:self.start_target_paragraph] + new_text + self.text[:self.stop_target_paragraph]
         return None
 
     def save(self, new_name):
@@ -110,7 +137,7 @@ if __name__ == '__main__':
                    'fio': 'Фамилия, имя, отчество'
                    }
     cwd = ['data']
-    file_path = os.path.join(*cwd, 'Протокол-допроса-потерпевшего.docx')
+    file_path = os.path.join(*cwd, 'input.txt')
     d = Document(file_path, text_params)
     txt = d.parse()
     family_name = d.find_fio()
@@ -118,7 +145,5 @@ if __name__ == '__main__':
     new_txt = open(os.path.join(*cwd, 'res.txt'), encoding='utf-8').read()
     d.change_text(new_txt)
     d.save(os.path.join(*cwd, 'my_doc.docx'))
-    print('-'*10)
-    print(txt)
-    print('-' * 10)
-    print(d.find_fio())
+    # print(txt)
+    # print(d.find_fio())
