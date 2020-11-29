@@ -16,9 +16,12 @@ class Document:
     Class 'Document' gets data_file_path
     Method 'parse' returns text from 'data_file_path' file
     """
-    def __init__(self, data_file_path, text_params={'start': '', 'stop': '', 'fio': ''}):
+    def __init__(self, data_file_path=None, text_params={'start': '', 'stop': '', 'fio': ''}):
         self.data_file_path = data_file_path
-        self.filetype = data_file_path.rsplit('.')[-1]
+        if data_file_path is None:
+            self.filetype = None
+        else:
+            self.filetype = data_file_path.rsplit('.')[-1]
         self.text_params = text_params
         self.text = ''
         self.docx = docx.Document()
@@ -27,6 +30,7 @@ class Document:
         self.stop_target_paragraph = None
         self.fio = None
         self.f = None
+
 
     def pdf2docx(self):
         pdf2docx.parse(self.data_file_path, self.data_file_path + '.docx')
@@ -107,7 +111,11 @@ class Document:
             return self.fio
 
     def change_text(self, new_text, highlight_text=True):
-        if self.filetype == 'docx':
+        if self.filetype is None:
+            for paragraph in new_text.split('\n'):
+                self.docx.add_paragraph(paragraph)
+            self.filetype = 'docx'
+        elif self.filetype == 'docx':
             new_text = new_text.split('\n')
             if self.start_target_paragraph is None and self.stop_target_paragraph is None:
                 for i, text in zip(range(len(self.docx.paragraphs)), new_text):

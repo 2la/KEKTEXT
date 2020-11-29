@@ -43,3 +43,15 @@ doc.change_text(new_txt)
 new_file_path = 'data\\output.docx'
 doc.save(new_file_path)
 ```
+Для того, чтобы создать новый docx документ и записать в него текст, необходимо выполнить:
+```python
+# Создаем новый docx документ
+doc = Document()
+# Пример случайного текста для записи в docx 
+new_txt = 'new text to write'
+# Записываем изменения в документ
+doc.change_text(new_txt)
+# Сохраняем документ на диск в папку new_file_path
+new_file_path = 'data\\output.docx'
+doc.save(new_file_path)
+```
