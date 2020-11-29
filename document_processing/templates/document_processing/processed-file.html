@@ -1,26 +1,37 @@
 {% extends 'document_processing/base.html' %}
+{% load crispy_forms_tags %}
 
 {% block content %}
+<main class="container mt-3">
+    <div>{% crispy form %}</div>
 
-<!--<div>-->
-<!--    {% if object.processed_text %}-->
-<!--        {{ object.processed_text }}-->
-<!--    {% else %}-->
-<!--        Processing... (Press F5)-->
-<!--    {% endif%}-->
-<!--</div>-->
 
-<div>
-    <h1>KEK</h1>
-    {% for file in files %}
-    <div class="container mt-3">
-        <span class="col-4">{{file.id}} <a href="file.origin_file.url">origin</a></span>
-        <progress class="col-4 d-inline progress progress-success file-progress" value="{{file.progress}}" max="100" data-file-id="{{file.id}}"></progress>
+    <div>
+        <h1>KEK</h1>
+        <table>
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Origin</th>
+                <th>Processed</th>
+                <th>Progress</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for file in files %}
+            <tr class="processing-info" data-file-id="{{file.id}}">
+                <td name="id">{{file.id}}</td>
+                <td name="origin"><a href="file.origin_file.url">{{file.short_origin_name}}</a></td>
+                <td name="processed"><a href="file.origin_file.url">{{file.short_processed_name}}</a></td>
+                <td name="progress"><progress class="progress progress-success" value="{{file.progress}}" max="100"></progress>
+    </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
     </div>
-    {% endfor %}
-</div>
 
-
+</main>
 {% endblock %}
 
 
@@ -28,30 +39,29 @@
 <script>
   $(document).ready(
       function() {
-          $(".file-progress").each(
-              function(index){
+          $(".processing-info").each(
+              function(){
                   let polling = setInterval(
                       async () => {
-                          let current_value = $( this ).attr("value")
-                          if (current_value == 100) {
+                          let current_value = parseInt($( this ).children('td[name="progress"]').children('progress')[0].getAttribute("value"));
+                          if (current_value === 100) {
                               clearInterval(polling);
                               return;
                           }
-                          console.log($( this ).attr("data-file-id"));
                           let response = await fetch("/progress/" + $( this ).attr("data-file-id"));
                           if (!response.ok){
                               return;
                           }
-                          let progress = response.json["progress"]
-                          if (current_value < progress){
-                              $( this ).attr("value", progress);
+                          let json = await response.json();
+                          if (current_value < json.progress){
+                              $( this ).children('td[name="progress"]').children('progress')[0].setAttribute("value", json.progress);
+                              $( this ).children('td[name="processed"]').children('a')[0].setAttribute("href", json.processed_url);
+                              $( this ).children('td[name="processed"]').children('a')[0].textContent = json.processed_name;
                           }
-                          console.log( $( this ).attr("data-file-id") + " " + $( this ).attr("value"));
 
 
-                      }, 2500
-                  )
-                  // console.log( index + ": " + $( this ).attr('data-file-id') );
+                      }, 250
+                  );
               }
           );
       }
