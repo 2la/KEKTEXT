@@ -29,12 +29,22 @@ class TextProcessor:
             self.corrector = jamspell.TSpellCorrector()
             self.corrector.LoadLangModel('ru.bin')
 
-    def process_preposition(self, preposition, pronoun):
-        if preposition in self.prepositions_variation:
-            return preposition[:-1], 'н' + pronoun
-        if preposition in self.prepositions:
-            return preposition, 'н' + pronoun
+    def process_preposition(self, preposition, pronoun, surname):
+        if surname:
+            if preposition in self.prepositions_variation:
+                return preposition[:-1], pronoun
+            if preposition in self.prepositions:
+                return preposition, pronoun
+        else:
+            if preposition in self.prepositions_variation:
+                return preposition[:-1], 'н' + pronoun
+            if preposition in self.prepositions:
+                return preposition, 'н' + pronoun
         return preposition, pronoun
+
+    @staticmethod
+    def split_paragraph(text):
+        return text.split('\n')
 
     @staticmethod
     def get_gender(text):
@@ -70,9 +80,22 @@ class TextProcessor:
         result_string = re.sub(r'(.) - (.)', r'\1-\2', result_string)
         result_string = result_string.replace(' . ', '. ')
         return result_string
+    
+    def process(self, text_in_first_person, surname=''):
+        splitted_by_paragraph_text = self.split_paragraph(text_in_first_person)
+        processed_paragraphs = []
 
-    def process(self, text_in_first_person):
-        gender = self.get_gender(text_in_first_person)
+        for paragraph in splitted_by_paragraph_text:
+            processed_paragraph = self.process_paragraph(paragraph, surname)
+            processed_paragraphs.append(processed_paragraph)
+
+        return '\n'.join(processed_paragraphs)
+
+    def process_paragraph(self, text_in_first_person, surname=''):
+        if surname:
+            gender = 'male'
+        else:
+            gender = self.get_gender(text_in_first_person)
 
         line = text_in_first_person.strip()
         sentences = self.sentence_regex.split(line)
@@ -119,13 +142,16 @@ class TextProcessor:
                         if parsed_word.normal_form == 'мы':
                             processed_word = self.oni.inflect(updated_tag).word
                         else:
-                            if gender == 'male':
-                                processed_word = self.on.inflect(updated_tag).word
+                            if surname:
+                                processed_word = surname
                             else:
-                                processed_word = self.ona.inflect(updated_tag).word
+                                if gender == 'male':
+                                    processed_word = self.on.inflect(updated_tag).word
+                                else:
+                                    processed_word = self.ona.inflect(updated_tag).word
 
                         if i != 0 and words[i - 1] in self.prepositions + self.prepositions_variation:
-                            preposition, pronoun = self.process_preposition(words[i - 1], processed_word)
+                            preposition, pronoun = self.process_preposition(words[i - 1], processed_word, surname)
                             processed_word = pronoun
                             processed_sentence.pop()
                             processed_sentence.append(preposition)
@@ -168,21 +194,23 @@ if __name__ == '__main__':
     #           'распивали спиртные напитки. В том числе в вагоне из числа пассажиров были военнослужащие, ' \
     #           'других отличительных признаков я не запомнила.'
 
-    example = 'После того как проводник прошел по вагону и предупредил, что до станции Омск оставалось ' \
-              'около 15 минут, я решила ' \
-              'пойти поставить свой мобильный телефон на зарядку для того, чтобы позвонить маме и ' \
-              'сказать о прибытии поезда. Так, я прошла в нерабочий тамбур, где напротив туалета над ' \
-              'окном поставила свой мобильный телефон заряжаться, положив его на верхний уступ окна. ' \
-              'В момент, когда я ставила телефон на зарядку, в тамбуре напротив туалета стоял проводник вагона, ' \
-              'он видел все мои действия. Проводник дожидался пассажира, который находился в туалете, для того чтобы ' \
-              'закрыть туалет перед прибытием на станцию Омск. Поставив телефон на зарядку я решила вернуться на свое ' \
-              'место, через минуту за мной вышел из ' \
-              'тамбура и проводник и прошел к себе. Я находилась на свое месте около 7-10 минут, после ' \
-              'чего решила проверить свой мобильный телефон. Также у меня вызвала подозрение женщина, на вид цыганка, ' \
-              'которая прошла в сторону туалета. Так, подойдя к нерабочему тамбуру я увидела, что в розетке осталось ' \
-              'только зарядное устройство от моего мобильного телефона, самого телефона не было. Я сразу поняла, ' \
-              'что его похитили и пошла к проводнику, сообщила о случившемся, на что проводник ответил что по ' \
-              'станции Омск вызовет сотрудников полиции для разбирательств.'
+    # example = 'После того как проводник прошел по вагону и предупредил, что до станции Омск оставалось ' \
+    #           'около 15 минут, я решила ' \
+    #           'пойти поставить свой мобильный телефон на зарядку для того, чтобы позвонить маме и ' \
+    #           'сказать о прибытии поезда. Так, я прошла в нерабочий тамбур, где напротив туалета над ' \
+    #           'окном поставила свой мобильный телефон заряжаться, положив его на верхний уступ окна. ' \
+    #           'В момент, когда я ставила телефон на зарядку, в тамбуре напротив туалета стоял проводник вагона, ' \
+    #           'он видел все мои действия. Проводник дожидался пассажира, который находился в туалете, для того чтобы ' \
+    #           'закрыть туалет перед прибытием на станцию Омск. Поставив телефон на зарядку я решила вернуться на свое ' \
+    #           'место, через минуту за мной вышел из ' \
+    #           'тамбура и проводник и прошел к себе. Я находилась на свое месте около 7-10 минут, после ' \
+    #           'чего решила проверить свой мобильный телефон. Также у меня вызвала подозрение женщина, на вид цыганка, ' \
+    #           'которая прошла в сторону туалета. Так, подойдя к нерабочему тамбуру я увидела, что в розетке осталось ' \
+    #           'только зарядное устройство от моего мобильного телефона, самого телефона не было. Я сразу поняла, ' \
+    #           'что его похитили и пошла к проводнику, сообщила о случившемся, на что проводник ответил что по ' \
+    #           'станции Омск вызовет сотрудников полиции для разбирательств.'
+
+    example = 'Иванов подошел ко мне, я его увидел.\n«Я сказал, отойди от меня»'
 
     text_processor = TextProcessor()
     result = text_processor.process(example)
