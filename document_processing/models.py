@@ -14,12 +14,15 @@ class File(models.Model):
     origin_file = models.FileField(upload_to='origins', null=True)
     origin_mime = models.CharField(max_length=120, blank=True, default='')
     origin_text = models.TextField(blank=True, default='')
-    processed_text = models.TextField(null=True)
+    processed_text = models.TextField(blank=True, default='')
     processed_file = models.FileField(upload_to='processed', null=True)
     progress = models.PositiveSmallIntegerField(default=0)
 
     @property
     def short_origin_name(self):
+        if self.input_type == self.InputTypes.TEXTBOX:
+            # return f'{self.origin_text[:50]}...'
+            return self.origin_text
         try:
             return self.origin_file.path.split('/')[-1]
         except ValueError:
@@ -27,10 +30,18 @@ class File(models.Model):
 
     @property
     def short_processed_name(self):
+        if self.input_type == self.InputTypes.TEXTBOX:
+            # return f'{self.processed_text[:50]}...'
+            return self.processed_text
         try:
             return self.processed_file.path.split('/')[-1]
         except ValueError:
             return ''
 
+
+class TextboxUnit(models.Model):
+    origin_text = models.TextField(max_length=2000)
+    processed_text = models.TextField(max_length=2000, blank=True, default='')
+    progress = models.PositiveSmallIntegerField(default=0)
 
 

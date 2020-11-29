@@ -24,7 +24,10 @@ def get_output_field(file):
 
 
 def get_input_type(file):
-    mime = mimetypes.MimeTypes().guess_type(file.origin_file.path)[0] or ''
+    try:
+        mime = mimetypes.MimeTypes().guess_type(file.origin_file.path)[0] or ''
+    except ValueError:
+        return File.InputTypes.TEXTBOX
     if mime.startswith('image'):
         return File.InputTypes.IMAGE
     if mime.startswith('text'):
@@ -33,14 +36,17 @@ def get_input_type(file):
         return File.InputTypes.DOCX
     if file.short_origin_name.split('.')[1] == 'pdf':
         return File.InputTypes.PDF
-    return File.InputTypes.TEXTBOX
+    return ''
 
 
 @background
 def process_file(file_id):
     file = File.objects.get(pk=file_id)
     print(file)
-    origin_path = file.origin_file.path
+    try:
+        origin_path = file.origin_file.path
+    except ValueError:
+        origin_path = None
     file.input_type = get_input_type(file)
     print(file.input_type)
     file.progress += 10
