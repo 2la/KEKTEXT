@@ -2,7 +2,7 @@ import re
 
 import pymorphy2
 from nltk import RegexpTokenizer
-import jamspell
+# import jamspell
 
 
 class TextProcessor:
@@ -25,9 +25,9 @@ class TextProcessor:
         self.prepositions_variation = ['во', 'ко', 'надо', 'обо', 'подо', 'передо', 'со']
 
         self.corrector = None
-        if use_spell_checker:
-            self.corrector = jamspell.TSpellCorrector()
-            self.corrector.LoadLangModel('ru.bin')
+        # if use_spell_checker:
+            # self.corrector = jamspell.TSpellCorrector()
+            # self.corrector.LoadLangModel('ru.bin')
 
     def process_preposition(self, preposition, pronoun):
         if preposition in self.prepositions_variation:
