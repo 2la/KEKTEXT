@@ -109,19 +109,23 @@ class Document:
     def change_text(self, new_text, highlight_text=True):
         if self.filetype == 'docx':
             new_text = new_text.split('\n')
-            for i, text in zip(range(self.start_target_paragraph, self.stop_target_paragraph), new_text):
-                if highlight_text:
-                    t = ''
-                    for w_old, w_new in zip(self.docx.paragraphs[i].text.split(), text.split()):
-                        if w_old != w_new:
-                            t = t + ' ' + str.upper(w_new)
-                        else:
-                            t = t + ' ' + w_new
-                    self.docx.paragraphs[i].text = t
-                else:
+            if self.start_target_paragraph is None and self.stop_target_paragraph is None:
+                for i, text in zip(range(len(self.docx.paragraphs)), new_text):
                     self.docx.paragraphs[i].text = text
-                # for j in range(len(self.docx.paragraphs[i].runs)):
-                #     self.docx.paragraphs[i].runs[j].font.color.rgb = docx.shared.RGBColor(0x42, 0x24, 0xE9)
+            else:
+                for i, text in zip(range(self.start_target_paragraph, self.stop_target_paragraph), new_text):
+                    if highlight_text:
+                        t = ''
+                        for w_old, w_new in zip(self.docx.paragraphs[i].text.split(), text.split()):
+                            if w_old != w_new:
+                                t = t + ' ' + str.upper(w_new)
+                            else:
+                                t = t + ' ' + w_new
+                        self.docx.paragraphs[i].text = t
+                    else:
+                        self.docx.paragraphs[i].text = text
+                    # for j in range(len(self.docx.paragraphs[i].runs)):
+                    #     self.docx.paragraphs[i].runs[j].font.color.rgb = docx.shared.RGBColor(0x42, 0x24, 0xE9)
         elif self.filetype == 'txt':
             self.text = self.text[:self.start_target_paragraph] + new_text + self.text[:self.stop_target_paragraph]
         return None
@@ -137,7 +141,7 @@ if __name__ == '__main__':
                    'fio': 'Фамилия, имя, отчество'
                    }
     cwd = ['data']
-    file_path = os.path.join(*cwd, 'input.txt')
+    file_path = os.path.join(*cwd, 'input.docx')
     d = Document(file_path, text_params)
     txt = d.parse()
     family_name = d.find_fio()
